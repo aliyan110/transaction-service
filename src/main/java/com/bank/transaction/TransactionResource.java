@@ -3,6 +3,7 @@ package com.bank.transaction;
 import com.bank.transaction.dto.AccountDTO;
 import com.bank.transaction.model.Account;
 import com.bank.transaction.model.TransactionEntity;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -16,8 +17,9 @@ import java.util.List;
 public class TransactionResource {
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response create(AccountDTO dto) {
+    public Response create( @RequestBody AccountDTO dto) {
         Account account = new Account();
         account.accountNumber = dto.accountNumber;
         account.accountTitle = dto.accountTitle;
