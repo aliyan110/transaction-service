@@ -11,7 +11,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-import java.io.File;
+import java.io.*;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -26,8 +26,8 @@ public class TransactionEventProducer {
 
     public TransactionEventProducer() throws Exception {
         // Load PEM files from resources
-        File svcPem = new File(getClass().getClassLoader().getResource("svc-pem.pem").toURI());
-        File caPem = new File(getClass().getClassLoader().getResource("ca-pem.pem").toURI());
+        File svcPem = getResourceAsTempFile("svc-pem.pem");
+        File caPem = getResourceAsTempFile("ca-pem.pem");
 
 
         Properties props = new Properties();
@@ -68,5 +68,18 @@ public class TransactionEventProducer {
         } finally {
             producer.flush();
         }
+    }
+
+    private File getResourceAsTempFile(String resourceName) throws IOException {
+        InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName);
+        if (is == null) {
+            throw new FileNotFoundException("Resource not found: " + resourceName);
+        }
+        File tempFile = File.createTempFile(resourceName, ".pem");
+        tempFile.deleteOnExit(); // optional cleanup
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            is.transferTo(fos);
+        }
+        return tempFile;
     }
 }
